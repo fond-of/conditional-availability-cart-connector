@@ -7,8 +7,11 @@ use Generated\Shared\Transfer\ItemTransfer;
 use Spryker\Zed\Cart\Dependency\ItemExpanderPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
-
-class ConditionalAvailabilityGroupKeyPlugin extends AbstractPlugin implements ItemExpanderPluginInterface
+/**
+ * @method \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\ProductBundleFacadeInterface getFacade()
+ * @method \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Communication\ProductBundleCommunicationFactory getFactory()
+ */
+class ConditionalAvailabilityValidatorPlugin extends AbstractPlugin implements ItemExpanderPluginInterface
 {
     public const GROUP_KEY_DELIMITER = '-';
 
@@ -20,7 +23,7 @@ class ConditionalAvailabilityGroupKeyPlugin extends AbstractPlugin implements It
     public function expandItems(CartChangeTransfer $cartChangeTransfer)
     {
         foreach ($cartChangeTransfer->getItems() as $cartItem) {
-            $cartItem->setGroupKey($this->buildGroupKey($cartItem));
+            $this->validateAvailability($cartItem);
         }
 
         return $cartChangeTransfer;
@@ -31,14 +34,17 @@ class ConditionalAvailabilityGroupKeyPlugin extends AbstractPlugin implements It
      *
      * @return string
      */
-    protected function buildGroupKey(ItemTransfer $cartItem)
+    protected function validateAvailability(ItemTransfer $cartItem)
     {
         $deliveryTime = $cartItem->getDeliveryTime();
 
         if (empty($deliveryTime)) {
-            return $cartItem->getSku();
-        }
+            $sku = $cartItem->getSku();
+            $qty = $cartItem->getQuantity();
 
-        return $cartItem->getSku() . static::GROUP_KEY_DELIMITER . $deliveryTime;
+            \dump($sku);
+            \dump($qty);
+        }
+        exit;
     }
 }
